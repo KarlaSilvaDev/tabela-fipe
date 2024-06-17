@@ -2,11 +2,15 @@ package br.com.alura.TabelaFipe.main;
 
 import br.com.alura.TabelaFipe.model.Data;
 import br.com.alura.TabelaFipe.model.Model;
+import br.com.alura.TabelaFipe.model.Vehicle;
 import br.com.alura.TabelaFipe.service.ApiConsumer;
 import br.com.alura.TabelaFipe.service.DataConverter;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -55,18 +59,51 @@ public class Main {
                 .sorted(Comparator.comparing(Data::code))
                 .forEach(System.out::println);
 
-        System.out.println("Informe o código da marca que deseja consultar:");
+        System.out.println("\nInforme o código da marca que deseja consultar:");
         var code = scanner.nextInt();
+        scanner.nextLine();
 
-        url += code + "/modelos";
+        url += code + "/modelos/";
 
         json = apiConsumer.getData(url);
         var models = converter.getData(json, Model.class);
 
-        System.out.println("Modelos da marca escolhida:");
+        System.out.println("\nModelos da marca escolhida:");
         models.modelsList().stream()
                 .sorted(Comparator.comparing(Data::name))
                 .forEach(System.out::println);
+
+        System.out.println("\nDigite um trecho do nome do carro a ser consultado:");
+        var vehicleName = scanner.nextLine();
+
+        List<Data> filteredModels = models.modelsList().stream()
+                .filter(m -> m.name().toLowerCase().contains(vehicleName))
+                .collect(Collectors.toList());
+
+        System.out.println("\nModelos filtrados:");
+        filteredModels.forEach(System.out::println);
+
+        System.out.println("Digite o código do modelo para buscar os valores de avaliação: ");
+        var modelCode = scanner.nextLine();
+
+        url += modelCode + "/anos/";
+
+        json = apiConsumer.getData(url);
+        List<Data> years = converter.getList(json,  Data.class);
+        List<Vehicle> vehicles = new ArrayList<>();
+
+        for (int i = 0; i < years.size(); i++) {
+            var urlYears = url + years.get(i).code();
+            json = apiConsumer.getData(urlYears);
+            Vehicle vehicle = converter.getData(json, Vehicle.class);
+            vehicles.add(vehicle);
+        }
+
+        System.out.println("Veículos filtrados com avaliações por ano:");
+        vehicles.forEach(System.out::println);
+
+
+
 
     }
 
