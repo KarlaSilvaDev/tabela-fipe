@@ -24,7 +24,7 @@ public class DataConverter implements IDataConverter {
     public <T> List<T> getList(String json, Class<T> className) {
         try{
             CollectionType list = mapper.getTypeFactory()
-                    .constructCollectionType(List.class, className)
+                    .constructCollectionType(List.class, className);
             return mapper.readValue(json, list);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
